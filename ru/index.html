@@ -1,0 +1,781 @@
+<!doctype html>
+<title>Two Dashboards</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,340;9..144,480;9..144,560;9..144,680&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ============ Tokens ============ */
+  :root{
+    color-scheme: light dark;
+    --paper:      #FAF6EE;
+    --surface:    #FFFFFF;
+    --ink:        #22262B;
+    --ink-soft:   #4B463C;
+    --ink-mute:   #6B6255;
+    --line:       #DED6C4;
+    --line-soft:  #EAE3D3;
+    --amber:      #8A5211;
+    --amber-tint: #EFD9AF;
+    --amber-fill: #D89A42;
+    --teal:       #009688;
+    --teal-tint:  #CFEAE6;
+    --red:        #C13538;
+    --red-tint:   #F4D9D6;
+    --neutral-mark: #C7BEAC;
+    --shadow: 0 1px 2px rgba(34,38,43,.06), 0 8px 24px -12px rgba(34,38,43,.18);
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:      #15171B;
+      --surface:    #1D2025;
+      --ink:        #EEE8D9;
+      --ink-soft:   #CFC7B4;
+      --ink-mute:   #9C927E;
+      --line:       #34383F;
+      --line-soft:  #2A2E34;
+      --amber:      #E3A542;
+      --amber-tint: #4A3A1C;
+      --amber-fill: #C88A32;
+      --teal:       #159E8C;
+      --teal-tint:  #163330;
+      --red:        #C2685F;
+      --red-tint:   #3A2320;
+      --neutral-mark: #454A52;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 28px -14px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:      #15171B;
+    --surface:    #1D2025;
+    --ink:        #EEE8D9;
+    --ink-soft:   #CFC7B4;
+    --ink-mute:   #9C927E;
+    --line:       #34383F;
+    --line-soft:  #2A2E34;
+    --amber:      #E3A542;
+    --amber-tint: #4A3A1C;
+    --amber-fill: #C88A32;
+    --teal:       #159E8C;
+    --teal-tint:  #163330;
+    --red:        #C2685F;
+    --red-tint:   #3A2320;
+    --neutral-mark: #454A52;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 28px -14px rgba(0,0,0,.6);
+  }
+
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  img{max-width:100%}
+  html,body{margin:0}
+  body{
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    padding-inline: 20px;
+    -webkit-font-smoothing: antialiased;
+  }
+  a{color: var(--amber)}
+  h1,h2,h3{
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 560;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    margin: 0;
+    color: var(--ink);
+  }
+  .mono{
+    font-family: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+    font-variant-numeric: tabular-nums;
+  }
+  .wrap{ max-width: 980px; margin-inline: auto; }
+  .wrap-wide{ max-width: 1160px; margin-inline: auto; }
+
+  /* ============ Top bar ============ */
+  .topbar{
+    position: sticky; top: env(safe-area-inset-top, 0px);
+    z-index: 20;
+    background: color-mix(in oklab, var(--paper) 88%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar-inner{
+    max-width: 1160px; margin-inline:auto;
+    display:flex; align-items:center; justify-content:space-between;
+    padding-block: 14px;
+    gap: 16px;
+  }
+  .brand{
+    display:flex; align-items:baseline; gap:9px;
+    font-family:"Fraunces", serif; font-weight:600; font-size:1.05rem;
+    white-space:nowrap;
+  }
+  .brand .dot{ color: var(--amber); }
+  .topnav{ display:flex; gap: 22px; font-size: .92rem; color: var(--ink-mute); }
+  .topnav a{ color: inherit; text-decoration:none; }
+  .topnav a:hover{ color: var(--ink); }
+  .topnav a:focus-visible, a:focus-visible, button:focus-visible{
+    outline: 2px solid var(--teal); outline-offset: 2px; border-radius: 3px;
+  }
+
+  /* ============ Hero ============ */
+  .hero{ padding-block: 56px 40px; }
+  .hero-grid{
+    display:grid; grid-template-columns: minmax(0,1.15fr) minmax(0,1fr); gap: 44px; align-items:center;
+  }
+  @media (max-width: 860px){ .hero-grid{ grid-template-columns: 1fr; } }
+  .eyebrow{
+    font-family:"IBM Plex Mono", monospace; font-size:.78rem; letter-spacing:.09em;
+    text-transform: uppercase; color: var(--teal); font-weight:600;
+    display:flex; align-items:center; gap:8px; margin-bottom: 16px;
+  }
+  .eyebrow::before{ content:""; width:7px; height:7px; border-radius:2px; background: var(--teal); display:inline-block; }
+  h1.display{ font-size: clamp(2.1rem, 4.6vw, 3.35rem); line-height:1.06; }
+  .hero p.lede{
+    margin-top: 18px; font-size: 1.14rem; color: var(--ink-soft); max-width: 46ch;
+  }
+  .hero-cta{ margin-top: 26px; display:flex; gap:14px; flex-wrap:wrap; align-items:center;}
+  .btn{
+    font-family:"Source Sans 3",sans-serif; font-weight:600; font-size:.96rem;
+    padding: 12px 20px; border-radius: 3px; text-decoration:none;
+    display:inline-flex; align-items:center; gap:8px;
+  }
+  .btn-primary{ background: var(--ink); color: var(--paper); }
+  .btn-primary:hover{ background: var(--amber); color:#fff; }
+  .btn-ghost{ color: var(--ink); border: 1px solid var(--line); }
+  .btn-ghost:hover{ border-color: var(--ink-mute); }
+
+  /* Hero visual: messy grid -> tiles */
+  .hero-visual{
+    background: var(--surface); border:1px solid var(--line); border-radius: 6px;
+    box-shadow: var(--shadow); overflow:hidden;
+  }
+  .hv-head{
+    display:flex; gap:6px; padding: 10px 14px; border-bottom:1px solid var(--line);
+    align-items:center;
+  }
+  .hv-tab{
+    font-family:"IBM Plex Mono",monospace; font-size:.72rem; padding: 4px 9px;
+    border-radius: 3px; color: var(--ink-mute); background: var(--line-soft);
+  }
+  .hv-tab.active{ background: var(--amber-tint); color: var(--amber); font-weight:600; }
+  .hv-body{ padding: 16px; }
+  table.messy{ width:100%; border-collapse:collapse; font-family:"IBM Plex Mono",monospace; font-size:.72rem; color: var(--ink-mute); }
+  table.messy td{ padding:4px 6px; border-bottom:1px dashed var(--line); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  table.messy tr:first-child td{ color:var(--ink-soft); font-weight:600; border-bottom:1px solid var(--line);}
+  .hv-arrow{ text-align:center; color:var(--ink-mute); font-size:1.1rem; padding:6px 0; }
+  .kpi-row{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+  .kpi-tile{ background: var(--line-soft); border-radius:4px; padding:10px 12px; }
+  .kpi-tile .kl{ font-size:.68rem; color:var(--ink-mute); }
+  .kpi-tile .kv{ font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:1.08rem; color:var(--teal); }
+
+  /* ============ How it works ============ */
+  .how{ padding-block: 46px; border-top: 1px solid var(--line); }
+  .how h2{ font-size:1.7rem; }
+  .how-sub{ color:var(--ink-mute); margin-top:8px; max-width:58ch; }
+  .how-steps{
+    margin-top: 30px; display:grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 0;
+    border: 1px solid var(--line); border-radius: 6px; overflow:hidden; background:var(--surface);
+  }
+  @media (max-width: 780px){ .how-steps{ grid-template-columns:1fr; } }
+  .how-step{ padding: 22px 22px 24px; position:relative; }
+  .how-steps .how-step + .how-step{ border-left:1px solid var(--line); }
+  @media (max-width: 780px){ .how-steps .how-step + .how-step{ border-left:none; border-top:1px solid var(--line);} }
+  .how-tab{
+    font-family:"IBM Plex Mono",monospace; font-size:.72rem; font-weight:600;
+    padding:3px 8px; border-radius:3px; display:inline-block; margin-bottom:12px;
+  }
+  .how-step:nth-child(1) .how-tab{ background: var(--line-soft); color: var(--ink-mute); }
+  .how-step:nth-child(2) .how-tab{ background: var(--amber-tint); color: var(--amber); }
+  .how-step:nth-child(3) .how-tab{ background: var(--teal-tint); color: var(--teal); }
+  .how-step h3{ font-size:1.12rem; font-weight:560; }
+  .how-step p{ color:var(--ink-mute); font-size:.94rem; margin-top:8px; }
+  .how-step code{
+    display:block; margin-top:12px; font-family:"IBM Plex Mono",monospace; font-size:.72rem;
+    background: var(--line-soft); color:var(--ink-soft); padding:8px 10px; border-radius:3px;
+    overflow-x:auto; white-space:pre;
+  }
+
+  /* ============ Case studies ============ */
+  .case{ padding-block: 54px; border-top: 1px solid var(--line); }
+  .case-head{ display:flex; justify-content:space-between; align-items:flex-end; gap:20px; flex-wrap:wrap; }
+  .case-eyebrow{
+    font-family:"IBM Plex Mono",monospace; font-size:.76rem; color:var(--ink-mute);
+    letter-spacing:.06em; text-transform:uppercase;
+  }
+  .case h2{ font-size: clamp(1.6rem,3vw,2.1rem); margin-top:6px; }
+  .case-meta{ text-align:right; font-size:.86rem; color:var(--ink-mute); font-family:"IBM Plex Mono",monospace; }
+  .case-brief{ margin-top:18px; color:var(--ink-soft); max-width:70ch; font-size:1.03rem; }
+
+  .stat-strip{
+    margin-top: 28px; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1px;
+    background: var(--line); border:1px solid var(--line); border-radius:6px; overflow:hidden;
+  }
+  @media (max-width:760px){ .stat-strip{ grid-template-columns:repeat(2,minmax(0,1fr));} }
+  .stat{ background:var(--surface); padding:16px 18px; }
+  .stat .sv{ font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:1.5rem; color:var(--ink); }
+  .stat .sv.flag{ color: var(--red); }
+  .stat .sv.good{ color: var(--teal); }
+  .stat .sl{ font-size:.78rem; color:var(--ink-mute); margin-top:4px; }
+
+  .chart-grid{ margin-top:34px; display:grid; grid-template-columns: minmax(0,1.3fr) minmax(0,1fr); gap:22px; }
+  @media (max-width:860px){ .chart-grid{ grid-template-columns:1fr; } }
+  .chart-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:6px;
+    padding:18px 18px 14px; box-shadow: var(--shadow);
+  }
+  .chart-card h4{
+    font-family:"Source Sans 3",sans-serif; font-weight:700; font-size:.92rem; color:var(--ink);
+    margin:0 0 3px;
+  }
+  .chart-card .chart-sub{ font-size:.78rem; color:var(--ink-mute); margin-bottom:10px; }
+  .chart-card svg{ width:100%; height:auto; display:block; overflow:visible; }
+  .mark-base{ fill: var(--neutral-mark); }
+  .mark-good{ fill: var(--teal); }
+  .mark-flag{ fill: var(--red); }
+  .axis-line{ stroke: var(--line); stroke-width:1; }
+  .grid-line{ stroke: var(--line-soft); stroke-width:1; }
+  .val-label{ font-family:"IBM Plex Mono",monospace; font-size:10.5px; fill: var(--ink-soft); }
+  .cat-label{ font-family:"Source Sans 3",sans-serif; font-size:11px; fill: var(--ink-mute); }
+  .mark-base, .mark-good, .mark-flag{ transition: opacity .12s ease; cursor:default; }
+  .bar-g:hover rect, .dot:hover{ opacity:.78; }
+  .line-path{ fill:none; stroke: var(--teal); stroke-width:2.5; }
+  .line-path.alt{ stroke: var(--red); }
+  .area-fill{ fill: var(--teal); opacity:.08; }
+
+  .legend{ display:flex; gap:16px; margin-top:12px; flex-wrap:wrap; font-size:.8rem; color:var(--ink-mute); }
+  .legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .legend i{ width:9px; height:9px; border-radius:2px; display:inline-block; }
+
+  .finding{
+    margin-top: 30px; display:grid; grid-template-columns: minmax(0,1fr) minmax(0,1.6fr); gap:26px;
+    background: var(--amber-tint); border-radius: 8px; padding: 24px 26px;
+  }
+  @media (max-width:760px){ .finding{ grid-template-columns:1fr; } }
+  .finding .flabel{
+    font-family:"IBM Plex Mono",monospace; font-size:.74rem; font-weight:600; color:var(--amber);
+    text-transform:uppercase; letter-spacing:.06em;
+  }
+  .finding blockquote{
+    margin: 8px 0 0; font-family:"Fraunces",serif; font-weight:480; font-size:1.18rem;
+    line-height:1.42; color: var(--ink); font-style:normal;
+  }
+  .finding .fmeta{ font-size:.82rem; color:var(--ink-mute); margin-top:10px; }
+  .reco{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px; }
+  .reco li{ display:flex; gap:10px; font-size:.95rem; color:var(--ink-soft); }
+  .reco .n{
+    font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:.78rem; color:var(--ink);
+    background: var(--surface); border:1px solid var(--line); border-radius: 50%;
+    width:20px;height:20px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    margin-top:1px;
+  }
+
+  /* ============ Versatility strip ============ */
+  .versatility{ padding-block:50px; border-top:1px solid var(--line); text-align:center; }
+  .versatility h2{ font-size:1.5rem; max-width:34ch; margin-inline:auto; }
+  .versatility p{ color:var(--ink-mute); max-width:56ch; margin: 14px auto 0; }
+  .v-row{ display:flex; justify-content:center; gap:14px; margin-top:26px; flex-wrap:wrap; }
+  .v-chip{
+    font-family:"IBM Plex Mono",monospace; font-size:.78rem; color:var(--ink-mute);
+    border:1px solid var(--line); border-radius:20px; padding:7px 14px;
+  }
+
+  /* ============ CTA / footer ============ */
+  .cta{ padding-block:56px; border-top:1px solid var(--line); }
+  .cta-box{
+    background: var(--ink); color: var(--paper); border-radius:10px;
+    padding: 42px 40px; display:flex; justify-content:space-between; align-items:center; gap:24px;
+    flex-wrap:wrap;
+  }
+  .cta-box h2{ color: var(--paper); font-size:1.55rem; max-width:24ch; }
+  .cta-box p{ color: color-mix(in oklab, var(--paper) 70%, transparent); margin-top:8px; max-width:40ch; }
+  .cta-box .btn-primary{ background: var(--amber); color:#1a1a1a; }
+  .cta-box .btn-primary:hover{ background: var(--teal); color:#fff; }
+  footer{ padding-block: 28px 44px; color: var(--ink-mute); font-size:.82rem; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;}
+  footer a{ color:var(--ink-mute); }
+
+  .sr-only{ position:absolute; width:1px;height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+</style>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><span>Two</span><span class="dot">·</span><span>Dashboards</span></div>
+    <nav class="topnav">
+      <a href="#how">Как это работает</a>
+      <a href="#case-sales">Продажи</a>
+      <a href="#case-support">Поддержка</a>
+      <a href="#contact">Связаться</a>
+    </nav>
+  </div>
+</div>
+
+<main>
+  <section class="hero">
+    <div class="wrap-wide hero-grid">
+      <div>
+        <div class="eyebrow">AI + Excel для малого бизнеса</div>
+        <h1 class="display">В вашей выручке уже есть история.<br>Её просто пока никто не прочитал.</h1>
+        <p class="lede">Беру выгрузку, которая уже лежит у вас в CRM или кассе — и превращаю её в
+          Excel-файл с живыми формулами, графиками и текстовым разбором на понятном языке:
+          что растёт, что проседает и что делать в первую очередь.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="#contact">Обсудить свой файл</a>
+          <a class="btn btn-ghost" href="#case-sales">Смотреть примеры ↓</a>
+        </div>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="hv-head">
+          <span class="hv-tab">Данные</span>
+          <span class="hv-tab active">Дашборд</span>
+          <span class="hv-tab">AI-анализ</span>
+        </div>
+        <div class="hv-body">
+          <table class="messy">
+            <tr><td>Дата</td><td>Товар</td><td>Сумма</td><td>Менеджер</td></tr>
+            <tr><td>2026-06-14</td><td>Powerbank 20000mAh</td><td>1 950</td><td>Петренко Д.</td></tr>
+            <tr><td>2026-06-14</td><td>Кабель USB-C</td><td>450</td><td>Мельник І.</td></tr>
+            <tr><td>2026-06-15</td><td>Умные часы</td><td>9 600</td><td>Ковальчук О.</td></tr>
+          </table>
+          <div class="hv-arrow">↓ формулы пересчитывают сами</div>
+          <div class="kpi-row">
+            <div class="kpi-tile"><div class="kl">Выручка, 2‑е полугодие</div><div class="kv">+27,7%</div></div>
+            <div class="kpi-tile"><div class="kl">Powerbank, рост</div><div class="kv">×2,9</div></div>
+            <div class="kpi-tile"><div class="kl">Ср. чек лидера</div><div class="kv">3 281 ₴</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how" id="how">
+    <div class="wrap">
+      <h2>Один и тот же путь для любых данных</h2>
+      <p class="how-sub">Не шаблон дашборда под одну задачу — трёхшаговая архитектура, которая
+        одинаково работает и для продаж, и для заявок поддержки, и для любой другой таблицы,
+        где есть даты, категории и суммы.</p>
+      <div class="how-steps">
+        <div class="how-step">
+          <span class="how-tab">01 Данные</span>
+          <h3>Ваша выгрузка становится Excel‑таблицей</h3>
+          <p>CSV/Excel-экспорт превращается в структурированную Table с фильтрами
+            и служебными колонками — без единой ручной правки исходных цифр.</p>
+          <code>=TEXT([Дата создания], "YYYY-MM")</code>
+        </div>
+        <div class="how-step">
+          <span class="how-tab">02 Дашборд</span>
+          <h3>Формулы считают, а не человек</h3>
+          <p>KPI-карточки и таблицы держатся на SUMIF / COUNTIFS / AVERAGEIF — добавите
+            строку данных, дашборд пересчитается сам, без пересборки файла.</p>
+          <code>=AVERAGEIF(Категория,"Возврат/Обмен",Время_закрытия)</code>
+        </div>
+        <div class="how-step">
+          <span class="how-tab">03 AI-анализ</span>
+          <h3>Цифры превращаются в решение</h3>
+          <p>Отдельный лист с текстом на понятном языке: что растёт, где риск,
+            кого из сотрудников разгрузить — со ссылкой на конкретные ячейки дашборда.</p>
+          <code>Приоритет: перегрузка Тараса — 86 заявок против 44-46 у коллег</code>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CASE 1: SALES ============ -->
+  <section class="case" id="case-sales">
+    <div class="wrap-wide">
+      <div class="case-head">
+        <div>
+          <div class="case-eyebrow">Кейс 01 · Розница</div>
+          <h2>Магазин электронных аксессуаров:<br>куда уходит рост, а куда — нет</h2>
+        </div>
+        <div class="case-meta">200 заказов<br>март – август 2026</div>
+      </div>
+      <p class="case-brief">Фиктивный, но реалистично смоделированный интернет-магазин
+        электроники. Задача: по сырой выгрузке продаж найти, что тянет выручку вверх,
+        что проседает, и кто из менеджеров работает эффективнее остальных.</p>
+
+      <div class="stat-strip">
+        <div class="stat"><div class="sv">508 500 ₴</div><div class="sl">выручка за период</div></div>
+        <div class="stat"><div class="sv good">+27,7%</div><div class="sl">рост 2‑го полугодия к 1‑му</div></div>
+        <div class="stat"><div class="sv">2 542 ₴</div><div class="sl">средний чек</div></div>
+        <div class="stat"><div class="sv flag">–68%</div><div class="sl">продажи Кабель USB‑C, 1П→2П</div></div>
+      </div>
+
+      <div class="chart-grid">
+        <div class="chart-card">
+          <h4>Выручка по месяцам</h4>
+          <div class="chart-sub">₴, март – август 2026</div>
+          <svg id="chart-revenue" viewBox="0 0 640 260" role="img" aria-label="Выручка по месяцам растёт с колебаниями, с пиком в июне"></svg>
+        </div>
+        <div class="chart-card">
+          <h4>Powerbank vs Кабель USB‑C</h4>
+          <div class="chart-sub">продаж, шт · 1‑е полугодие → 2‑е</div>
+          <svg id="chart-products" viewBox="0 0 360 260" role="img" aria-label="Powerbank вырос почти втрое, Кабель USB-C упал более чем вдвое"></svg>
+          <div class="legend">
+            <span><i style="background:var(--teal)"></i>растёт</span>
+            <span><i style="background:var(--red)"></i>требует внимания</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-grid" style="margin-top:22px">
+        <div class="chart-card">
+          <h4>Менеджеры: средний чек</h4>
+          <div class="chart-sub">₴ на заказ</div>
+          <svg id="chart-managers" viewBox="0 0 640 220" role="img" aria-label="Дмитрий Петренко лидирует по среднему чеку"></svg>
+        </div>
+        <div class="chart-card">
+          <h4>Топ‑5 товаров по выручке</h4>
+          <div class="chart-sub">₴ за период</div>
+          <svg id="chart-topproducts" viewBox="0 0 360 220" role="img" aria-label="Умные часы — лидер по выручке при малом числе продаж"></svg>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div>
+          <div class="flabel">Лист «AI‑анализ» → Товары</div>
+          <div class="fmeta">Автоматически сформированный вывод</div>
+        </div>
+        <div>
+          <blockquote>«Кабель USB‑C: 37 продаж — но выручка всего 18 270 ₴, самая низкая среди
+            всех товаров, и продажи заметно снижаются во второй половине периода. Рекомендация —
+            пересмотреть цену или использовать как повод для допродажи более дорогих аксессуаров.»</blockquote>
+        </div>
+      </div>
+
+      <ul class="reco" style="margin-top:22px; max-width:70ch">
+        <li><span class="n">1</span>Усилить Powerbank 20000mAh как явную точку роста — запас на складе, продвижение именно этого канала.</li>
+        <li><span class="n">2</span>Разобраться с падением Кабель USB‑C: пересмотр цены или встраивание в допродажи.</li>
+        <li><span class="n">3</span>Изучить и растиражировать подход Дмитрия Петренко (лидер по чеку и выручке) на остальную команду.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ CASE 2: SUPPORT ============ -->
+  <section class="case" id="case-support">
+    <div class="wrap-wide">
+      <div class="case-head">
+        <div>
+          <div class="case-eyebrow">Кейс 02 · Служба поддержки</div>
+          <h2>Тот же интернет-магазин:<br>где теряется скорость и лояльность</h2>
+        </div>
+        <div class="case-meta">220 заявок<br>апрель – август 2026</div>
+      </div>
+      <p class="case-brief">Другой отдел того же типа бизнеса, другой набор вопросов: не про
+        выручку, а про операционку — сколько ждёт клиент, кто из команды перегружен и какая
+        категория обращений тихо растёт быстрее остальных.</p>
+
+      <div class="stat-strip">
+        <div class="stat"><div class="sv">220</div><div class="sl">заявок за период</div></div>
+        <div class="stat"><div class="sv flag">54,5%</div><div class="sl">ответ дольше 60 минут</div></div>
+        <div class="stat"><div class="sv flag">7,2% → 19,5%</div><div class="sl">доля «Брак товара»</div></div>
+        <div class="stat"><div class="sv flag">×1,9</div><div class="sl">нагрузка перегруженного сотрудника</div></div>
+      </div>
+
+      <div class="chart-grid">
+        <div class="chart-card">
+          <h4>Заявок по месяцам</h4>
+          <div class="chart-sub">всего (столбцы) vs «Брак товара» (линия)</div>
+          <svg id="chart-tickets" viewBox="0 0 640 260" role="img" aria-label="Заявок в целом стабильно, доля брака товара растёт с 0 до 13 в месяц"></svg>
+          <div class="legend">
+            <span><i style="background:var(--neutral-mark)"></i>заявок всего</span>
+            <span><i style="background:var(--red)"></i>брак товара</span>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h4>Первый ответ по каналам</h4>
+          <div class="chart-sub">минут в среднем</div>
+          <svg id="chart-channels" viewBox="0 0 360 260" role="img" aria-label="Email отвечает на порядок медленнее звонка и чата"></svg>
+        </div>
+      </div>
+
+      <div class="chart-grid" style="margin-top:22px">
+        <div class="chart-card">
+          <h4>Нагрузка по сотрудникам</h4>
+          <div class="chart-sub">заявок в работе за период</div>
+          <svg id="chart-agents-load" viewBox="0 0 360 220" role="img" aria-label="Тарас Мельниченко ведёт почти вдвое больше заявок, чем коллеги"></svg>
+        </div>
+        <div class="chart-card">
+          <h4>Средняя оценка по сотрудникам</h4>
+          <div class="chart-sub">1–5, по отзывам клиентов</div>
+          <svg id="chart-agents-csat" viewBox="0 0 360 220" role="img" aria-label="Оценка перегруженного сотрудника заметно ниже остальных"></svg>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div>
+          <div class="flabel">Лист «AI‑анализ» → Команда</div>
+          <div class="fmeta">Автоматически сформированный вывод</div>
+        </div>
+        <div>
+          <blockquote>«Тарас Мельниченко ведёт 86 заявок — почти вдвое больше остальных сотрудников
+            (44–46 у каждого), и при этом отвечает медленнее всех, дольше закрывает и получает более
+            низкие оценки. Это похоже не на слабую работу, а на явную перегрузку — главный кандидат
+            на перераспределение нагрузки, а не на дисциплинарный разговор.»</blockquote>
+        </div>
+      </div>
+
+      <ul class="reco" style="margin-top:22px; max-width:70ch">
+        <li><span class="n">1</span>Перераспределить часть заявок Тараса на менее загруженных коллег.</li>
+        <li><span class="n">2</span>Расследовать рост доли «Брак товара» — вероятно, проблема с конкретным поставщиком или партией.</li>
+        <li><span class="n">3</span>Ускорить Email‑очередь (172,8 мин первого ответа) — автоответ со сроком или отдельный приоритет.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="versatility">
+    <div class="wrap">
+      <h2>Один и тот же файл. Любой отдел.</h2>
+      <p>Разница между этими двумя кейсами — не в архитектуре, а в названиях колонок.
+        Тот же принцип (Данные → Дашборд → AI‑анализ) переносится на склад, маркетинг,
+        финансы — на любую таблицу, где есть даты, категории и суммы.</p>
+      <div class="v-row">
+        <span class="v-chip">Продажи и склад</span>
+        <span class="v-chip">Заявки и поддержка</span>
+        <span class="v-chip">Маркетинг и лиды</span>
+        <span class="v-chip">Финансы и расходы</span>
+        <span class="v-chip">HR и найм</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta" id="contact">
+    <div class="wrap-wide">
+      <div class="cta-box">
+        <div>
+          <h2>Пришлите свою выгрузку — получите такой же дашборд</h2>
+          <p>Первая версия за несколько дней, без абонплаты и без нового софта —
+            всё живёт в файле, который у вас уже открывается.</p>
+        </div>
+        <a class="btn btn-primary" href="mailto:hello@your-domain.com?subject=AI%20%2B%20Excel%20дашборд">Написать о своём проекте</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="wrap-wide">
+    <span>Two Dashboards — демонстрационные кейсы на смоделированных данных.</span>
+    <span>Excel · Python · openpyxl · формулы, а не картинки</span>
+  </footer>
+</main>
+
+<script>
+(function(){
+  const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+  function svgns(tag, attrs){
+    const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (const k in attrs) el.setAttribute(k, attrs[k]);
+    return el;
+  }
+
+  // ---------- Vertical bar chart ----------
+  function barChart(id, items, opts){
+    opts = opts || {};
+    const svg = document.getElementById(id);
+    const vb = svg.viewBox.baseVal;
+    const W = vb.width, H = vb.height;
+    const padL = opts.padL || 46, padR = 14, padT = 16, padB = opts.padB || 46;
+    const innerW = W - padL - padR, innerH = H - padT - padB;
+    const maxVal = Math.max(...items.map(d => d.value)) * 1.18;
+    const n = items.length;
+    const slot = innerW / n;
+    const barW = Math.min(slot * 0.56, opts.maxBarW || 56);
+    const fmt = opts.fmt || (v => Math.round(v).toLocaleString('ru-RU'));
+
+    // gridlines (3)
+    for (let i = 1; i <= 3; i++){
+      const y = padT + innerH - (innerH * i / 3);
+      svg.appendChild(svgns('line', {x1: padL, x2: padL + innerW, y1: y, y2: y, class:'grid-line'}));
+    }
+    svg.appendChild(svgns('line', {x1: padL, x2: padL + innerW, y1: padT + innerH, y2: padT + innerH, class:'axis-line'}));
+
+    items.forEach((d, i) => {
+      const x = padL + i * slot + (slot - barW) / 2;
+      const h = (d.value / maxVal) * innerH;
+      const y = padT + innerH - h;
+      const g = svgns('g', {class:'bar-g'});
+      const cls = d.flag ? 'mark-flag' : (d.good ? 'mark-good' : 'mark-base');
+      const rect = svgns('rect', {x, y, width: barW, height: h, rx: 2, class: cls});
+      const title = svgns('title', {});
+      title.textContent = `${d.label}: ${fmt(d.value)}${opts.unit ? ' ' + opts.unit : ''}`;
+      g.appendChild(rect); g.appendChild(title);
+      svg.appendChild(g);
+
+      const val = svgns('text', {x: x + barW/2, y: y - 6, 'text-anchor':'middle', class:'val-label'});
+      val.textContent = fmt(d.value);
+      svg.appendChild(val);
+
+      const lbl = svgns('text', {x: x + barW/2, y: padT + innerH + 16, 'text-anchor':'middle', class:'cat-label'});
+      const words = String(d.label).split(' ');
+      if (words.length > 1 && d.label.length > 12){
+        lbl.setAttribute('y', padT + innerH + 14);
+        const t1 = svgns('tspan', {x: x + barW/2, dy:0}); t1.textContent = words.slice(0, Math.ceil(words.length/2)).join(' ');
+        const t2 = svgns('tspan', {x: x + barW/2, dy:12}); t2.textContent = words.slice(Math.ceil(words.length/2)).join(' ');
+        lbl.appendChild(t1); lbl.appendChild(t2);
+      } else {
+        lbl.textContent = d.label;
+      }
+      svg.appendChild(lbl);
+    });
+  }
+
+  // ---------- Line chart (single series, area) ----------
+  function lineChart(id, items, opts){
+    opts = opts || {};
+    const svg = document.getElementById(id);
+    const vb = svg.viewBox.baseVal;
+    const W = vb.width, H = vb.height;
+    const padL = 50, padR = 20, padT = 20, padB = 40;
+    const innerW = W - padL - padR, innerH = H - padT - padB;
+    const maxVal = Math.max(...items.map(d => d.value)) * 1.12;
+    const minVal = 0;
+    const n = items.length;
+    const stepX = innerW / (n - 1);
+
+    for (let i = 1; i <= 3; i++){
+      const y = padT + innerH - (innerH * i / 3);
+      svg.appendChild(svgns('line', {x1: padL, x2: padL + innerW, y1: y, y2: y, class:'grid-line'}));
+    }
+    svg.appendChild(svgns('line', {x1: padL, x2: padL + innerW, y1: padT + innerH, y2: padT + innerH, class:'axis-line'}));
+
+    const pts = items.map((d, i) => {
+      const x = padL + i * stepX;
+      const y = padT + innerH - ((d.value - minVal) / (maxVal - minVal)) * innerH;
+      return {x, y, d};
+    });
+
+    const areaPath = 'M' + pts.map(p => `${p.x},${p.y}`).join(' L') +
+      ` L${pts[pts.length-1].x},${padT+innerH} L${pts[0].x},${padT+innerH} Z`;
+    svg.appendChild(svgns('path', {d: areaPath, class:'area-fill'}));
+
+    const linePath = 'M' + pts.map(p => `${p.x},${p.y}`).join(' L');
+    svg.appendChild(svgns('path', {d: linePath, class:'line-path'}));
+
+    pts.forEach(p => {
+      const g = svgns('g', {class:'dot'});
+      const c = svgns('circle', {cx: p.x, cy: p.y, r: 4.5, fill: 'var(--teal)', stroke: 'var(--surface)', 'stroke-width': 2});
+      const title = svgns('title', {}); title.textContent = `${p.d.label}: ${Math.round(p.d.value).toLocaleString('ru-RU')} ₴`;
+      g.appendChild(c); g.appendChild(title);
+      svg.appendChild(g);
+
+      const lbl = svgns('text', {x: p.x, y: padT + innerH + 20, 'text-anchor':'middle', class:'cat-label'});
+      lbl.textContent = p.d.label;
+      svg.appendChild(lbl);
+    });
+  }
+
+  // ---------- Combo: bars (context) + line (flagged series) ----------
+  function comboChart(id, items, opts){
+    opts = opts || {};
+    const svg = document.getElementById(id);
+    const vb = svg.viewBox.baseVal;
+    const W = vb.width, H = vb.height;
+    const padL = 46, padR = 20, padT = 20, padB = 40;
+    const innerW = W - padL - padR, innerH = H - padT - padB;
+    const maxVal = Math.max(...items.map(d => d.total)) * 1.2;
+    const n = items.length;
+    const slot = innerW / n;
+    const barW = Math.min(slot * 0.5, 46);
+
+    for (let i = 1; i <= 3; i++){
+      const y = padT + innerH - (innerH * i / 3);
+      svg.appendChild(svgns('line', {x1: padL, x2: padL + innerW, y1: y, y2: y, class:'grid-line'}));
+    }
+    svg.appendChild(svgns('line', {x1: padL, x2: padL + innerW, y1: padT + innerH, y2: padT + innerH, class:'axis-line'}));
+
+    const pts = [];
+    items.forEach((d, i) => {
+      const cx = padL + i * slot + slot / 2;
+      const x = cx - barW / 2;
+      const h = (d.total / maxVal) * innerH;
+      const y = padT + innerH - h;
+      const g = svgns('g', {class:'bar-g'});
+      const rect = svgns('rect', {x, y, width: barW, height: h, rx: 2, class:'mark-base'});
+      const title = svgns('title', {}); title.textContent = `${d.label}: всего ${d.total} заявок`;
+      g.appendChild(rect); g.appendChild(title);
+      svg.appendChild(g);
+
+      const lbl = svgns('text', {x: cx, y: padT + innerH + 18, 'text-anchor':'middle', class:'cat-label'});
+      lbl.textContent = d.label;
+      svg.appendChild(lbl);
+
+      const py = padT + innerH - (d.flagged / maxVal) * innerH;
+      pts.push({x: cx, y: py, d});
+    });
+
+    const linePath = 'M' + pts.map(p => `${p.x},${p.y}`).join(' L');
+    svg.appendChild(svgns('path', {d: linePath, class:'line-path alt'}));
+    pts.forEach(p => {
+      const g = svgns('g', {class:'dot'});
+      const c = svgns('circle', {cx: p.x, cy: p.y, r: 4.5, fill:'var(--red)', stroke:'var(--surface)', 'stroke-width':2});
+      const title = svgns('title', {}); title.textContent = `${p.d.label}: брак товара — ${p.d.flagged}`;
+      g.appendChild(c); g.appendChild(title);
+      svg.appendChild(g);
+      const val = svgns('text', {x:p.x, y:p.y-9, 'text-anchor':'middle', class:'val-label'});
+      val.setAttribute('fill','var(--red)');
+      val.textContent = p.d.flagged;
+      svg.appendChild(val);
+    });
+  }
+
+  // ================= Case 1 data =================
+  lineChart('chart-revenue', [
+    {label:'мар', value:70520}, {label:'апр', value:68820}, {label:'май', value:83970},
+    {label:'июн', value:103490}, {label:'июл', value:96000}, {label:'авг', value:85700},
+  ]);
+
+  barChart('chart-products', [
+    {label:'Powerbank · 1П', value:10}, {label:'Powerbank · 2П', value:29, good:true},
+    {label:'Кабель · 1П', value:28}, {label:'Кабель · 2П', value:9, flag:true},
+  ], {unit:'шт'});
+
+  barChart('chart-managers', [
+    {label:'Бондаренко А.', value:1848},
+    {label:'Мельник І.', value:2168},
+    {label:'Ковальчук О.', value:2684},
+    {label:'Петренко Д.', value:3281, good:true},
+  ], {unit:'₴'});
+
+  barChart('chart-topproducts', [
+    {label:'Умные часы', value:120890, good:true},
+    {label:'Powerbank', value:87350},
+    {label:'Колонка BT', value:81420},
+    {label:'Клавиатура', value:71530},
+    {label:'Веб-камера', value:36040},
+  ], {unit:'₴'});
+
+  // ================= Case 2 data =================
+  comboChart('chart-tickets', [
+    {label:'апр', total:38, flagged:0},
+    {label:'май', total:34, flagged:5},
+    {label:'июн', total:49, flagged:5},
+    {label:'июл', total:48, flagged:8},
+    {label:'авг', total:51, flagged:13},
+  ]);
+
+  barChart('chart-channels', [
+    {label:'Телефон', value:5.0},
+    {label:'Чат', value:10.6},
+    {label:'Сайт', value:68.8},
+    {label:'Email', value:172.8, flag:true},
+  ], {unit:'мин', fmt: v => v.toFixed(1).replace('.',',')});
+
+  barChart('chart-agents-load', [
+    {label:'Гнатюк В.', value:44},
+    {label:'Сидоренко О.', value:44},
+    {label:'Ткаченко М.', value:46},
+    {label:'Мельниченко Т.', value:86, flag:true},
+  ], {unit:'заявок'});
+
+  barChart('chart-agents-csat', [
+    {label:'Мельниченко Т.', value:3.33, flag:true},
+    {label:'Ткаченко М.', value:3.67},
+    {label:'Сидоренко О.', value:3.94},
+    {label:'Гнатюк В.', value:4.03, good:true},
+  ], {unit:'', fmt: v => v.toFixed(2).replace('.',',')});
+})();
+</script>
